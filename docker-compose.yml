@@ -1,0 +1,91 @@
+version: '3.3'
+
+services:
+
+  mysql-node1:
+    image: mysql/mysql-server:8.0.19
+    hostname: mysql-node1
+    container_name: mysql-node1
+    restart: always
+    command:
+      - "--server_id=1"
+    volumes: 
+      - ./mysql-node/etc/my.cnf:/etc/my.cnf
+    networks: 
+      - docker-local
+    environment: 
+       MYSQL_ROOT_PASSWORD: p4ssW0rd
+       MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+       MYSQL_LOG_CONSOLE: 'true'
+       MYSQL_ROOT_HOST: '172.20.0.%'
+    
+  mysql-node2:
+    image: mysql/mysql-server:8.0.19
+    hostname: mysql-node2
+    container_name: mysql-node2
+    restart: always
+    command:
+      - "--server_id=2"
+    volumes: 
+      - ./mysql-node/etc/my.cnf:/etc/my.cnf
+    networks: 
+      - docker-local
+    environment: 
+       MYSQL_ROOT_PASSWORD: p4ssW0rd
+       MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+       MYSQL_LOG_CONSOLE: 'true'
+       MYSQL_ROOT_HOST: '172.20.0.%'
+
+  mysql-node3:
+    image: mysql/mysql-server:8.0.19
+    hostname: mysql-node3
+    container_name: mysql-node3
+    restart: always
+    command:
+      - "--server_id=3"
+    volumes: 
+      - ./mysql-node/etc/my.cnf:/etc/my.cnf
+    networks: 
+      - docker-local
+    environment: 
+       MYSQL_ROOT_PASSWORD: p4ssW0rd
+       MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+       MYSQL_LOG_CONSOLE: 'true'
+       MYSQL_ROOT_HOST: '172.20.0.%'
+
+  mysql-init:
+    image: mysql/mysql-server:8.0.19
+    hostname: mysql-init
+    container_name: mysql-init
+    volumes: 
+      - ./mysql-node/shell/wait-for-it.sh:/sbin/wait-for-it.sh
+      - ./mysql-node/shell/init-cluster.sh:/sbin/init-cluster.sh
+    entrypoint: "/sbin/init-cluster.sh"
+    networks: 
+      - docker-local
+    environment: 
+       CLUSTER_NODES: mysql-node1,mysql-node2,mysql-node3
+       MYSQL_CLUSTER_NAME: DOCKER_MYSQL_CLUSTER
+       MYSQL_USER: root
+       MYSQL_PASSWORD: p4ssW0rd
+       
+  mysql-router:
+    image: mysql/mysql-router:8.0.19
+    hostname: mysql-router
+    container_name: mysql-router
+    networks: 
+      - docker-local
+ # Uncomment if you use docker secrets
+ #   volumes: 
+ #     - ./mysql-node/shell/run.sh:/run.sh
+    environment: 
+      MYSQL_USER: root
+ #    MYSQL_PASSWORD: /path/to/password/file
+      MYSQL_PASSWORD: p4ssW0rd
+      MYSQL_INNODB_NUM_MEMBERS: 3
+      MYSQL_HOST: mysql-node1
+      MYSQL_PORT: 3306
+  
+networks:
+  docker-local:
+    external: true
