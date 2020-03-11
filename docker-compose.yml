@@ -77,7 +77,7 @@ services:
       - docker-local
  # Uncomment if you use docker secrets
  #   volumes: 
- #     - ./mysql-node/shell/run.sh:/run.sh
+ #     - ./mysql-node/router/run.sh:/run.sh
     environment: 
       MYSQL_USER: root
  #    MYSQL_PASSWORD: /path/to/password/file
